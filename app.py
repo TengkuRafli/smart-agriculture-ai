@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request
 from flask import Flask, render_template, request, jsonify
 import numpy as np
 import pickle
+import os
 
 app = Flask(__name__)
 
+# load model
 model = pickle.load(open("model.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 encoder = pickle.load(open("label_encoder.pkl", "rb"))
@@ -16,20 +17,14 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # input dari form (yang kamu punya)
         temperature = float(request.form.get('temperature'))
         humidity = float(request.form.get('humidity'))
         soil_moisture = float(request.form.get('soil_moisture'))
 
-        # 🔥 nilai dummy (bisa kamu ubah biar realistis)
-        N = 50
-        P = 50
-        K = 50
-        ph = 6.5
+        # dummy sementara
+        N, P, K, ph = 50, 50, 50, 6.5
 
-        # urutan HARUS sama seperti training
         data = np.array([[N, P, K, temperature, humidity, ph, soil_moisture]])
-
         data_scaled = scaler.transform(data)
 
         pred = model.predict(data_scaled)
@@ -55,7 +50,6 @@ def api_predict():
         humidity = float(data['humidity'])
         soil_moisture = float(data['soil_moisture'])
 
-        # dummy (sementara)
         N, P, K, ph = 50, 50, 50, 6.5
 
         input_data = np.array([[N, P, K, temperature, humidity, ph, soil_moisture]])
@@ -71,5 +65,7 @@ def api_predict():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+# 🔥 WAJIB untuk Railway
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
