@@ -14,32 +14,34 @@ encoder = pickle.load(open("label_encoder.pkl", "rb"))
 def index():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/api/predict', methods=['POST'])
+def api_predict():
     try:
-        temperature = float(request.form.get('temperature'))
-        humidity = float(request.form.get('humidity'))
-        soil_moisture = float(request.form.get('soil_moisture'))
+        data = request.get_json()
+        print("DATA MASUK:", data)
 
-        # dummy sementara
+        temperature = float(data.get('temperature', 0))
+        humidity = float(data.get('humidity', 0))
+        soil_moisture = float(data.get('soil_moisture', 0))
+
         N, P, K, ph = 50, 50, 50, 6.5
 
-        data = np.array([[N, P, K, temperature, humidity, ph, soil_moisture]])
-        data_scaled = scaler.transform(data)
+        input_data = np.array([[N, P, K, temperature, humidity, ph, soil_moisture]])
+        input_scaled = scaler.transform(input_data)
 
-        pred = model.predict(data_scaled)
+        pred = model.predict(input_scaled)
         hasil = encoder.inverse_transform(pred)
 
-        return render_template(
-            'index.html',
-            prediction=hasil[0],
-            temperature=temperature,
-            humidity=humidity,
-            soil_moisture=soil_moisture
-        )
+        return jsonify({
+            "status": "success",
+            "prediction": hasil[0]
+        })
 
     except Exception as e:
-        return render_template('index.html', prediction=f"Error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
