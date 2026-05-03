@@ -94,7 +94,10 @@ def predict():
                 "temperature": temperature,
                 "humidity": humidity,
                 "soil_moisture": soil_moisture,
-                "N": N, "P": P, "K": K, "ph": ph
+                "N": N, 
+                "P": P, 
+                "K": K, 
+                "ph": ph
             }
         }
 
