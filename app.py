@@ -167,10 +167,19 @@ def api_predict():
         confidence = round(float(prob * penalty) * 100, 2)
 
         latest_result = {
-            "plant": hasil,
-            "confidence": confidence,
-            "mode": mode
-        }
+    "plant": hasil,
+    "confidence": confidence,
+    "mode": mode,
+    "sensor": {
+        "temperature": temperature,
+        "humidity": humidity,
+        "soil_moisture": soil_moisture,
+        "N": N,
+        "P": P,
+        "K": K,
+        "ph": ph
+    }
+}
 
         return jsonify(latest_result)
 
